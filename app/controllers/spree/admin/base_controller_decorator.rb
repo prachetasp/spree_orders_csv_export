@@ -46,7 +46,11 @@ Spree::Admin::BaseController.class_eval do
           csv << csv_row
         end
       end
-      send_data full_csv, :filename => 'orders.csv'
+      file_name = "orders_#{Time.now.strftime("%m-%d-%Y_%H-%M-%S")}.csv"
+      # Always email just in case
+      OrdersCsvMailer.csv_mail(ENV['ORDERS_CSV_TO'], file_name, full_csv).deliver
+      # If it hasn't timed out then return within browser
+      send_data full_csv, :filename => file_name
     else
       redirect_to :back
       flash[:error] = "No orders found!"
